@@ -37,7 +37,7 @@ headers = {
     'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36',
 }
 
-response = requests.get('https://www.apartments.com/state-college-pa/', cookies=cookies, headers=headers)
+response = requests.get('https://www.apartments.com/state-college-pa/', headers=headers)
 
 selector = '#placardContainer > ul'
 
@@ -85,3 +85,26 @@ for article in apartments.find_all('article', class_='placard'):
     })
 
 # Now do transformation
+
+properties_transformed = []
+
+for property in properties:
+    property_transformed = {
+        'image_url': property['image_url'],
+        'property_name': property['property_name'],
+        'beds': property['beds'],
+        'phone': property['phone']
+    }
+
+    for amenity in property['amenities']:
+        property_transformed[amenity] = True
+    if property['pricing'] is None:
+        continue
+    else:
+        pricing_low = int(property['pricing'].split(' - ')[0].replace('$', '').replace(',', ''))
+        pricing_high = int(property['pricing'].split(' - ')[1].replace('$', '').replace(',','')) if property['pricing'] is not None and ' - ' in property['pricing'] else None
+
+    property_transformed['pricing_low'] = pricing_low
+    property_transformed['pricing_high'] = pricing_high
+
+    properties_transformed.append(property_transformed)
